@@ -2,7 +2,11 @@
 
 ## Происхождение
 
-Срез снят **Offline Explorer Enterprise 6.7** (проект в исходном RAR), целевой URL вида  
+Канонический склад файлов:  
+[Google Drive — ds_forum_damps](https://drive.google.com/drive/folders/1vu788RsUnWlqY_wzHBs2DaGKrJAve1Gy)  
+(`DarkSide_forum.rar`, папки `Offline Explorer/`, `ds-alliance.ru/`).
+
+Срез снят **Offline Explorer Enterprise 6.7**, целевой URL вида  
 `http://ds-alliance.ru/forum/`, логин бота `history_bot`, даты файлов в основном **2014-04-03**.
 
 Это HTML-зеркало ответов SMF, а не:
