@@ -4,7 +4,7 @@
 
 Движок оригинала: **SMF 2.0.4** + **TEA 1.3.1**. Это HTML-статика под nginx, не дамп MySQL.
 
-- Репозиторий (**private**): https://github.com/Z1zi/ds-forum-archive  
+- Репозиторий: https://github.com/Z1zi/ds-forum-archive  
 - Сырьё (канон): [Google Drive — ds_forum_damps](https://drive.google.com/drive/folders/1vu788RsUnWlqY_wzHBs2DaGKrJAve1Gy)
 
 Готовая ссылка всегда такого вида:
@@ -19,15 +19,13 @@ http://<хост>/ds-alliance.ru/forum/default.htm
 
 ## Быстрый старт (выберите один путь)
 
-Нужны: `git`, `gh` (для private), на VDS ещё `nginx`, `rsync`, `curl`, `zstd`.
+Нужны: `git`, `gh` (для Release), на VDS ещё `nginx`, `rsync`, `curl`, `zstd`.
 
 ### 1) Локально — уже есть `work/site` (без nginx)
 
 ```bash
 git clone https://github.com/Z1zi/ds-forum-archive.git
 cd ds-forum-archive
-gh auth login   # private repo
-
 # DATA_DIR = каталог, где лежит work/site (рядом с клоном или ваш путь)
 export DATA_DIR=/home/fz/Downloads/ds_forum   # ← поправьте под себя
 
@@ -55,8 +53,6 @@ BIND=0.0.0.0 PORT=8765 ./scripts/serve_local.sh
 sudo apt-get update
 sudo apt-get install -y nginx rsync curl zstd git
 # GitHub CLI: https://github.com/cli/cli#installation
-gh auth login
-
 git clone https://github.com/Z1zi/ds-forum-archive.git
 cd ds-forum-archive
 
@@ -153,7 +149,7 @@ DATA_DIR/
 
 ---
 
-## Обновить private Release
+## Обновить Release
 
 ```bash
 export DATA_DIR=/path/to/ds_forum
