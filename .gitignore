@@ -1,0 +1,22 @@
+# Local build artefacts and source dumps — never commit
+/work/
+../work/
+*.rar
+*.zip
+*.tar
+*.tar.zst
+*.part*
+site-stats.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Secrets / OE project crumbs if someone copies them in
+WebDown.dat
+**/URL2s.*
+**/*hash_passwrd*
+**/*login2*
