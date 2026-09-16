@@ -1,147 +1,169 @@
 # Dark Side forum static archive
 
-Статическое зеркало форума альянса **Dark Side** (EVE Online, `ds-alliance.ru`), сохранённое участником через Offline Explorer в апреле 2014.
+Статическое зеркало форума альянса **Dark Side** (EVE Online, `ds-alliance.ru`), Offline Explorer, апрель 2014.
 
-Оригинальный движок: **Simple Machines Forum 2.0.4** + мод **TEA 1.3.1** (Temars EVE API).  
-Это **не** бэкап сервера и **не** дамп MySQL — только HTML/статика под nginx.
+Движок оригинала: **SMF 2.0.4** + **TEA 1.3.1**. Это HTML-статика под nginx, не дамп MySQL.
 
-Репозиторий **private**: https://github.com/Z1zi/ds-forum-archive
+- Репозиторий (**private**): https://github.com/Z1zi/ds-forum-archive  
+- Сырьё (канон): [Google Drive — ds_forum_damps](https://drive.google.com/drive/folders/1vu788RsUnWlqY_wzHBs2DaGKrJAve1Gy)
 
-## Источник исходников (канон)
+Готовая ссылка всегда такого вида:
 
-Всё сырьё лежит на Google Drive:
-
-**[ds_forum_damps](https://drive.google.com/drive/folders/1vu788RsUnWlqY_wzHBs2DaGKrJAve1Gy)**
-
-| На Drive | Назначение |
-|---|---|
-| `DarkSide_forum.rar` (~2.54 ГБ) | Архив Offline Explorer (локально часто как `DarkSide_forum-001.rar`) |
-| `Offline Explorer/` | Уже распакованный проект OE (если качали папку) |
-| `ds-alliance.ru/` | Дерево хоста форума рядом с OE |
-
-Скачивание папок через веб-интерфейс Drive часто даёт ZIP вида `drive-download-*.zip` — скрипты их тоже подхватывают.
-
-Кладёте содержимое Drive в один каталог (`DATA_DIR`) рядом с клоном репозитория или указываете `DATA_DIR` явно.
-
-## Что в git, а что нет
-
-GitHub не тянет многогигабайтные дампы в git (лимит файла 100 МБ).
-
-| В репозитории | Вне git |
-|---|---|
-| `scripts/`, `nginx/`, docs | Сырьё с [Google Drive](https://drive.google.com/drive/folders/1vu788RsUnWlqY_wzHBs2DaGKrJAve1Gy) |
-| README | Опционально: очищенный сайт в GitHub Release (`*.tar.zst.part*`) |
-
-Release — удобный «готовый сайт» для хоста без пересборки. Сырьё для пересборки и канон истории файлов — **Drive**.
-
-## Если уже всё скачано локально
-
-Типичная раскладка после загрузки Drive (как на рабочей машине сборки):
-
-```
-DATA_DIR/                          # например …/Downloads/ds_forum
-  DarkSide_forum-001.rar           # = DarkSide_forum.rar с Drive
-  drive-download-*.zip             # опционально (выгрузки папок)
-  Offline Explorer/                # если качали папку с Drive
-  ds-alliance.ru/                  # если качали папку с Drive
-  ds-forum-archive/                # git clone этого репо
-  work/
-    raw/                           # результат extract.sh
-    site/                          # результат clean_static.py  ← document root
-    dist/                          # чанки для gh release
+```text
+http://<хост>/ds-alliance.ru/forum/default.htm
 ```
 
-Уже есть очищенный `work/site/` — можно сразу проверять и ставить в nginx (см. ниже). Пересобирать из RAR не обязательно.
+Скрипты в конце выводят блок `ARCHIVE READY` с этим URL.
 
-### Локальная проверка без nginx
+---
+
+## Быстрый старт (выберите один путь)
+
+Нужны: `git`, `gh` (для private), на VDS ещё `nginx`, `rsync`, `curl`, `zstd`.
+
+### 1) Локально — уже есть `work/site` (без nginx)
 
 ```bash
+git clone https://github.com/Z1zi/ds-forum-archive.git
 cd ds-forum-archive
-export DATA_DIR=..                 # каталог, где лежит work/site
-./scripts/serve_local.sh           # http://127.0.0.1:8765/
-# главная: /ds-alliance.ru/forum/default.htm
+gh auth login   # private repo
+
+# DATA_DIR = каталог, где лежит work/site (рядом с клоном или ваш путь)
+export DATA_DIR=/home/fz/Downloads/ds_forum   # ← поправьте под себя
+
+./scripts/serve_local.sh
+# в консоли будет:
+#   ARCHIVE READY
+#   http://127.0.0.1:8765/ds-alliance.ru/forum/default.htm
 ```
 
-Проверено на уже собранном `work/site`: главная, CSS темы и страница топика (`index.php@topic=10.0`) отдаются 200.
+Открыть в браузере именно эту строку.
 
-### Сборка с нуля из локального DATA_DIR
+Чтобы слушать на всех интерфейсах (доступ с телефона в LAN):
 
 ```bash
+BIND=0.0.0.0 PORT=8765 ./scripts/serve_local.sh
+# URL в консоли будет с 0.0.0.0 — замените на IP машины, например:
+# http://192.168.1.10:8765/ds-alliance.ru/forum/default.htm
+```
+
+### 2) VDS / хост — готовые чанки с GitHub Release + nginx
+
+Один проход: скачать → распаковать → nginx → печать ссылки.
+
+```bash
+sudo apt-get update
+sudo apt-get install -y nginx rsync curl zstd git
+# GitHub CLI: https://github.com/cli/cli#installation
+gh auth login
+
+git clone https://github.com/Z1zi/ds-forum-archive.git
 cd ds-forum-archive
-export DATA_DIR=/path/to/ds_forum  # папка с rar / Offline Explorer / zip с Drive
 
-./scripts/extract.sh               # → $DATA_DIR/work/raw/Offline Explorer/download
-./scripts/build_site.sh            # → $DATA_DIR/work/site
-./scripts/serve_local.sh           # быстрый смоук-тест
-# по желанию:
-./scripts/pack_release.sh          # → work/dist для private Release
+# домен VDS или оставьте _ (тогда в ссылке будет IP сервера)
+export DOMAIN=archive.example.com    # ← ваш домен или IP, либо _
+export TAG=v1.0.0
+
+./scripts/install_from_release.sh
+# в консоли будет:
+#   ARCHIVE READY
+#   http://archive.example.com/ds-alliance.ru/forum/default.htm
+#   (или http://<IP>/ds-alliance.ru/forum/default.htm если DOMAIN=_)
 ```
 
-`extract.sh` выбирает источник: готовый `Offline Explorer/download` → папка `ds-alliance.ru` → RAR.  
-ZIP `drive-download-*.zip` по умолчанию **не** мержатся (много шума); включить: `MERGE_DRIVE_ZIP=1 ./scripts/extract.sh`.
+A-запись домена должна смотреть на этот VDS. Порт 80 открыт в firewall (`ufw allow 80/tcp`).
 
-## Развёртывание на хосте (nginx)
-
-### Вариант A — из уже собранного `work/site` (этот компьютер)
+### 3) VDS / хост — сайт уже собран в `work/site` (rsync + nginx)
 
 ```bash
-sudo mkdir -p /var/www/ds-forum-archive
-sudo rsync -a --delete "$DATA_DIR/work/site/" /var/www/ds-forum-archive/
-sudo cp nginx/archive.conf /etc/nginx/sites-available/ds-forum-archive.conf
-# поправьте server_name и root
-sudo ln -sf /etc/nginx/sites-available/ds-forum-archive.conf /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
+git clone https://github.com/Z1zi/ds-forum-archive.git
+cd ds-forum-archive
+
+export DATA_DIR=/path/to/ds_forum          # там есть work/site
+export DOMAIN=archive.example.com          # или _ для IP
+# export SITE=$DATA_DIR/work/site          # по умолчанию так и есть
+
+./scripts/deploy_nginx.sh
+#   ARCHIVE READY
+#   http://archive.example.com/ds-alliance.ru/forum/default.htm
 ```
 
-### Вариант B — с private GitHub Release (готовые чанки)
+### 4) Сборка с нуля из Drive, потом локальный линк
+
+Скачайте с [Drive](https://drive.google.com/drive/folders/1vu788RsUnWlqY_wzHBs2DaGKrJAve1Gy) в `$DATA_DIR`:  
+`DarkSide_forum.rar` (или `DarkSide_forum-001.rar`), опционально папки `Offline Explorer/`, `ds-alliance.ru/`.
 
 ```bash
-gh auth login   # доступ к private repo
-gh release download v1.0.0 -R Z1zi/ds-forum-archive -D dist
-cd dist
-cat ds-forum-static.tar.zst.part* > ds-forum-static.tar.zst
-sha256sum -c SHA256SUMS
-zstd -d ds-forum-static.tar.zst
-sudo mkdir -p /var/www/ds-forum-archive
-sudo tar -xf ds-forum-static.tar -C /var/www/ds-forum-archive
-# далее nginx как в варианте A
+git clone https://github.com/Z1zi/ds-forum-archive.git
+cd ds-forum-archive
+export DATA_DIR=/path/to/folder/with/drive/files
+
+./scripts/extract.sh
+./scripts/build_site.sh
+./scripts/serve_local.sh
+#   ARCHIVE READY
+#   http://127.0.0.1:8765/ds-alliance.ru/forum/default.htm
 ```
 
-Открыть сайт → редирект на `/ds-alliance.ru/forum/default.htm`.
+На nginx после сборки: `DOMAIN=… ./scripts/deploy_nginx.sh`.
 
-## Что делает очистка
+---
 
-- сохраняет раскладку хостов OE (`ds-alliance.ru/forum/…`, `i.imgur.com/…`, …), чтобы `../../cdn/...` работали;
-- склеивает `%&OvrN` / `_&OvrN`;
-- выбрасывает markasread / wap / session-имена / `Descr.WD3`;
-- **удаляет** `login2` / `hash_passwrd`;
-- правит `@fin20` и session-хвосты в HTML;
-- вход: `ds-alliance.ru/forum/default.htm`.
+## Что должно получиться
 
-## Известные ограничения
+| Где | Команда | Линк в консоли |
+|---|---|---|
+| Ноутбук | `./scripts/serve_local.sh` | `http://127.0.0.1:8765/ds-alliance.ru/forum/default.htm` |
+| VDS + Release | `./scripts/install_from_release.sh` | `http://<DOMAIN-или-IP>/ds-alliance.ru/forum/default.htm` |
+| VDS + свой site | `./scripts/deploy_nginx.sh` | то же |
 
-1. Нет живого SMF (логин, ответы, серверный поиск).
-2. Внешние картинки — только то, что попало в дамп OE.
-3. Закрытые борды вне ACL `history_bot` отсутствуют.
-4. Имена с `@`, `;`, `=` — норма; nginx отдаёт как файлы.
-5. Кодировка в основном **windows-1251**.
-6. Музейный срез ~2014.
+Проверка с другой машины:
 
+```bash
+curl -sI "http://<хост>/ds-alliance.ru/forum/default.htm" | head -3
+# ожидание: HTTP/1.1 200
+```
+
+---
+
+## Раскладка DATA_DIR
+
+```
+DATA_DIR/
+  DarkSide_forum-001.rar     # = DarkSide_forum.rar с Drive
+  Offline Explorer/          # если качали папку
+  ds-alliance.ru/            # если качали папку
+  ds-forum-archive/          # этот git clone
+  work/site/                 # очищенный сайт = document root
+```
+
+| В git | Вне git |
+|---|---|
+| scripts, nginx, docs | [Drive](https://drive.google.com/drive/folders/1vu788RsUnWlqY_wzHBs2DaGKrJAve1Gy) |
+| | Release `*.tar.zst.part*` (готовый сайт) |
+
+`drive-download-*.zip` по умолчанию не мержатся (`MERGE_DRIVE_ZIP=1` чтобы включить).
+
+---
+
+## Ограничения
+
+Нет живого SMF; часть внешних картинок 404; закрытые борды вне `history_bot` отсутствуют; кодировка windows-1251; срез ~2014.  
 Подробнее: [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 
-## Публикация / обновление private Release
+---
+
+## Обновить private Release
 
 ```bash
+export DATA_DIR=/path/to/ds_forum
 ./scripts/pack_release.sh
-gh release create v1.0.1 "$DATA_DIR"/work/dist/* \
-  -R Z1zi/ds-forum-archive \
-  --title "Static site data v1.0.1" \
-  --notes "Rebuild from Drive sources. See README."
+gh release create v1.0.1 "$DATA_DIR"/work/dist/* -R Z1zi/ds-forum-archive \
+  --title "Static site data v1.0.1" --notes "See README."
 ```
 
-В git — только код и документация. Сырой OE (`WebDown.dat` и т.п.) и rar/zip в git не пушить.
+Не пушить в git rar/zip/`work/`/секреты OE (`WebDown.dat`, `hash_passwrd`).
 
-## Лицензии и этика
+## Лицензии
 
-Контент — авторы постов и альянс Dark Side. Репозиторий — обвязка для сохранения истории.  
-SMF © Simple Machines; TEA © авторы мода.
+Контент — авторы постов и альянс Dark Side. SMF © Simple Machines; TEA © авторы мода.
