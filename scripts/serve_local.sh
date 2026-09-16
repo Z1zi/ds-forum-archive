@@ -48,5 +48,6 @@ class H(SimpleHTTPRequestHandler):
             return "text/html; charset=windows-1251"
         return super().guess_type(path)
 
+print(f"listening on {bind}:{port}", flush=True)
 ThreadingHTTPServer((bind, port), H).serve_forever()
 PY
