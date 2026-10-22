@@ -1,0 +1,32 @@
+# Local build artefacts and source dumps — never commit
+/work/
+../work/
+*.rar
+*.zip
+*.tar
+*.tar.zst
+*.part*
+site-stats.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Secrets / OE project crumbs if someone copies them in
+WebDown.dat
+**/URL2s.*
+**/*hash_passwrd*
+**/*login2*
+
+# SSH keys and host credentials (id_dsforum/)
+id_dsforum/
+**/id_dsforum/
+id_rsa
+id_rsa.pub
+**/id_rsa
+**/id_rsa.pub
+creds_for_dsforum.txt
+**/creds_for_dsforum.txt

@@ -1,0 +1,112 @@
+/* Layout fixes for the static SMF mirror. Loaded after Themes/default/css/index.css. */
+
+/* Top menu: sprite caps were painting over the labels and the items stacked. */
+#main_menu {
+	clear: both;
+	float: none;
+	width: auto;
+	overflow: visible;
+	padding: 0.35em 0 0.7em;
+}
+#main_menu ul.dropmenu {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 18px;
+	padding: 0;
+}
+#main_menu ul.dropmenu > li {
+	float: none;
+	width: auto;
+	position: relative;
+}
+#main_menu ul.dropmenu > li > a.firstlevel,
+#main_menu ul.dropmenu > li > a.firstlevel span.firstlevel,
+#main_menu ul.dropmenu > li > a.active,
+#main_menu ul.dropmenu > li > a.active span.firstlevel {
+	background: none;
+	position: static;
+	left: auto;
+	height: auto;
+	line-height: 1.5;
+	display: inline;
+	margin: 0;
+	padding: 0;
+	white-space: nowrap;
+}
+#main_menu ul.dropmenu > li > a.active,
+#main_menu ul.dropmenu > li > a.active span {
+	color: #1a2744;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+/* ie6.css is linked for every browser in this mirror. It squeezes menu items to 1px. */
+.dropmenu li {
+	width: auto;
+}
+.buttonlist ul li {
+	width: auto;
+}
+
+/* Category bar: title on the left, unread link and collapse icon on the right. */
+table.table_list h3.catbg {
+	display: flex;
+	align-items: center;
+	height: 31px;
+	line-height: 31px;
+	overflow: hidden;
+	gap: 10px;
+}
+table.table_list h3.catbg a.collapse,
+table.table_list h3.catbg a.unreadlink {
+	float: none;
+	height: auto;
+	line-height: inherit;
+	margin: 0;
+	flex: 0 0 auto;
+}
+table.table_list h3.catbg > a:not(.collapse):not(.unreadlink) {
+	order: 0;
+}
+table.table_list h3.catbg a.unreadlink {
+	order: 1;
+	margin-left: auto;
+	white-space: nowrap;
+}
+table.table_list h3.catbg a.collapse {
+	order: 2;
+	display: inline-flex;
+	align-items: center;
+}
+table.table_list h3.catbg a.collapse img {
+	display: block;
+}
+
+/* Post text starts at the left edge of the column beside the author, not the right edge. */
+/* ie6.css floats the whole post column to the right edge. */
+#forumposts .postarea,
+#personal_messages .postarea {
+	float: none;
+	width: auto;
+	margin: 0 0 0 16em;
+	text-align: left;
+}
+#forumposts .postarea .flow_hidden {
+	width: auto;
+	overflow: hidden;
+}
+#forumposts .keyinfo {
+	float: none;
+	width: auto;
+	text-align: left;
+}
+#forumposts .post,
+#forumposts .inner {
+	clear: both;
+	float: none;
+	width: auto;
+	text-align: left;
+	margin-left: 0;
+	margin-right: 0;
+}
